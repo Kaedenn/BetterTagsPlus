@@ -1,0 +1,13 @@
+[manifest]
+version = "1.0.0"
+dump_lua = true
+priority = -10
+
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = "self.HUD_tag:remove()"
+position = "after"
+payload = '''kcrGenerateTagUi()'''
+match_indent = true
+
