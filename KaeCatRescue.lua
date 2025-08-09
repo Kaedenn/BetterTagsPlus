@@ -10,7 +10,7 @@ load_module("Lib/tag_ui.lua")
 
 --[[ Called to draw the mod's config box ]]
 SMODS.current_mod.config_tab = function()
-    return load_module("config_ui.lua")()
+    return load_module("Lib/config_ui.lua")()
 end
 
 local function getTagKey(tag)
