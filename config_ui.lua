@@ -7,11 +7,26 @@
 
 -- https://github.com/Steamodded/smods/wiki/UI-Guide
 
-G.FUNCS.kcr_config_updated = function(config)
-    if config.cycle_config.ref_value == "anchor" then
-        KaeCatRescue.config.anchor = config.to_key
+local function on_kcr_config_updated(conf)
+    -- Prevent update spam
+    if type(conf) == "table" and conf.ref_value == "x_fine_adjust" then
+        local prior_key = conf.ref_value .. "_prior"
+        local prior_value = conf.ref_table[prior_key]
+        local curr_value = conf.ref_table[conf.ref_value]
+        if prior_value == curr_value then
+            return
+        end
+        conf.ref_table[prior_key] = curr_value
+    end
+    if G.STAGE == G.STAGES.RUN then
+        local save_reduce = G.SETTINGS.reduced_motion
+        G.SETTINGS.reduced_motion = true
+        kcrGenerateTagUi()
+        G.SETTINGS.reduced_motion = save_reduce
     end
 end
+
+G.FUNCS.kcr_on_config_updated = on_kcr_config_updated
 
 return function()
     return {n = G.UIT.ROOT, config = {
@@ -41,14 +56,32 @@ return function()
             colour = G.C.BLACK,
             emboss = 0.05,
         }, nodes = {
-            create_toggle{
-                label = "Group Tags",
-                info = {"Visually group tags of the same level"},
+            create_slider{
+                label = "Location Adjustment",
+                id = "kcr_x_adjust",
+                colour = G.C.RED,
                 ref_table = KaeCatRescue.config,
-                ref_value = "do_group",
-                active_colour = G.C.RED
+                ref_value = "x_fine_adjust",
+                label_scale = 0.5,
+                w = 2,
+                min = 0,
+                max = 3,
+                decimal_places = 1,
+                callback = "kcr_on_config_updated",
             },
-            create_option_cycle{
+            create_toggle{
+                label = "Right Anchor",
+                info = {
+                    "If grouping is enabled, draw text",
+                    "to the right of the parent tag, ",
+                    "instead of the left"
+                },
+                ref_table = KaeCatRescue.config,
+                ref_value = "anchor_right",
+                active_colour = G.C.RED,
+                callback = on_kcr_config_updated,
+            },
+            --[[create_option_cycle{
                 label = "Grouped Text Anchor",
                 info = {
                     "If grouping is enabled, where should the",
@@ -57,45 +90,31 @@ return function()
                 scale = 0.8,
                 w = 4,
                 options = { "Left", "Right" },
-                current_option = 2,
+                current_option = KaeCatRescue.config.anchor or 2,
                 ref_table = KaeCatRescue.config,
                 ref_value = "anchor",
-                opt_callback = "kcr_config_updated",
-            },
-        }},
-        {n = G.UIT.R, config = {
-            align = "cm",
-            padding = 0.1,
-            r = 0.1,
-            colour = G.C.BLACK,
-            emboss = 0.05,
-        }, nodes = {
+                callback = on_kcr_config_updated,
+            },]]
             create_toggle{
-                label = "Hide x1",
+                label = "Hide 'x1' Text",
                 info = {
                     "Hide 'x1' text when there's",
                     "just one tag of that level"
                 },
                 ref_table = KaeCatRescue.config,
                 ref_value = "hide_x1",
-                active_colour = G.C.RED
+                active_colour = G.C.RED,
+                callback = on_kcr_config_updated,
+            },
+            create_toggle{
+                label = "Hide All Text",
+                info = {"Hide all text (overrides above)"},
+                ref_table = KaeCatRescue.config,
+                ref_value = "hide_text",
+                active_colour = G.C.RED,
+                callback = on_kcr_config_updated,
             },
         }},
-        --[[{n = G.UIT.R, config = {
-            align = "cm",
-            padding = 0.1,
-            r = 0.1,
-            colour = G.C.BLACK,
-            emboss = 0.05,
-        }, nodes = {
-            create_toggle{
-                label = "Show Count Hints",
-                info = {"Show combined cat tag levels"},
-                ref_table = KaeCatRescue.config,
-                ref_value = "show_hints",
-                active_colour = G.C.RED
-            },
-        }},]]
         {n = G.UIT.R, config = {
             align = "cm",
             padding = 0.1,
@@ -108,7 +127,8 @@ return function()
                 info = {"Save when combining cat tags"},
                 ref_table = KaeCatRescue.config,
                 ref_value = "autosave",
-                active_colour = G.C.RED
+                active_colour = G.C.RED,
+                callback = on_kcr_config_updated,
             },
         }},
     }}

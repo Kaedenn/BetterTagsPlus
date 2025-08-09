@@ -1,7 +1,8 @@
 return {
-    do_group = true,
+    x_fine_adjust = 1.7,
     hide_x1 = true,
-    anchor = 2,         -- 1: Left, 2: Right
+    hide_text = false,
+    anchor_right = true,
     show_hints = false,
     autosave = false,
 }

@@ -26,11 +26,13 @@ end
 
 --[[ Determine what the combined cat tags would look like.
 --
+-- Condense 500 Level 1 tags:
+-- print(collect_cat_tags({tally={[1]=500}, asstr=true}))
+--
 -- @param args {tally: table?, asstr: boolean?}
 -- @return table final tally, also including total clicks
 --]]
 function collect_cat_tags(args)
-    local tally = args and args.tally or tally_cat_tags()
     local asstr = args and args.asstr or false
 
     local builder = setmetatable({}, {
@@ -51,10 +53,18 @@ function collect_cat_tags(args)
         end
     end
 
-    for i = 1, #G.GAME.tags do
-        local tag = G.GAME.tags[i]
-        if tag.key == "tag_cry_cat" then
-            add_entry(tag.ability and tag.ability.level or 1)
+    if args and args.tally then
+        for level, count in ipairs(args.tally) do
+            for i = 1, count do
+                add_entry(level)
+            end
+        end
+    else
+        for i = 1, #G.GAME.tags do
+            local tag = G.GAME.tags[i]
+            if tag.key == "tag_cry_cat" then
+                add_entry(tag.ability and tag.ability.level or 1)
+            end
         end
     end
 

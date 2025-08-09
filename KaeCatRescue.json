@@ -3,17 +3,17 @@
     "name": "Kaedenn's Cat Rescue",
     "display_name": "Kaedenn's Cat Rescue",
     "author": ["Kaedenn"],
-    "description": "Simple behaviors pertaining to managing cat tags.",
+    "description": "BetterTags, but with perfect Cat Tag support.",
     "prefix": "kcr",
     "main_file": "KaeCatRescue.lua",
     "priority": 0,
     "badge_colour": "321d0e",
     "badge_text_colour": "97572b",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "dependencies": [
         "Cryptid (>=0.5.0)"
     ],
     "conflicts": [
-        "BetterTags (>=2.0.0)"
+        "bettertags"
     ]
 }
