@@ -2,6 +2,12 @@ if not KaeCatRescue then KaeCatRescue = {} end
 
 KaeCatRescue.config = SMODS.current_mod.config
 
+function kcrDebug(message)
+    if KaeCatRescue.config.debug then
+        print(message)
+    end
+end
+
 local function load_module(path)
     return assert(SMODS.load_file(path, "KaeCatRescue"))()
 end
@@ -61,9 +67,7 @@ function kcrGenerateTagUi(do_reload)
                 tag = tag
             }
         end
-        --if not tag.HUD_tag then
-            tag.HUD_tag = done[key].HUD_tag
-        --end
+        tag.HUD_tag = done[key].HUD_tag
     end
 
     -- Ensure the tags don't scroll off-screen (taken from Cryptid)
@@ -122,5 +126,13 @@ if success and dpAPI.isVersionCompatible(1) then
 
     for _, command in ipairs(commands) do
         debugplus.addCommand(command)
+    end
+end
+
+--[[ This function is called by the Lovely injection ]]
+function kcrOnTagCombined(source, target)
+    if KaeCatRescue.config.autosave then
+        kcrDebug("Saving...")
+        save_run()
     end
 end

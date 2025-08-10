@@ -6,7 +6,7 @@
     "description": "BetterTags, but with perfect Cat Tag support.",
     "prefix": "kcr",
     "main_file": "KaeCatRescue.lua",
-    "priority": 0,
+    "priority": 200,
     "badge_colour": "321d0e",
     "badge_text_colour": "97572b",
     "version": "1.0.1",

@@ -1,7 +1,7 @@
 [manifest]
 version = "1.0.0"
 dump_lua = true
-priority = -10
+priority = 200
 
 [[patches]]
 [patches.pattern]
@@ -53,6 +53,14 @@ position = "after"
 payload = '''kcrGenerateTagUi()'''
 match_indent = true
 count = 1 # FIXME: Was 2; figure out why
+
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = "cry_too_fast_kitty = nil"
+position = "after"
+payload = '''kcrOnTagCombined(self, other_cat)'''
+match_indent = true
 
 [[patches]]
 [patches.pattern]
