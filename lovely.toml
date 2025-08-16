@@ -3,14 +3,7 @@ version = "1.0.0"
 dump_lua = true
 priority = 200
 
-[[patches]]
-[patches.pattern]
-target = "tag.lua"
-pattern = "self.HUD_tag:remove()"
-position = "after"
-payload = '''kcrGenerateTagUi()'''
-match_indent = true
-
+# function Tag:save()
 [[patches]]
 [patches.pattern]
 target = "tag.lua"
@@ -20,6 +13,7 @@ payload = ''',
 count = self.count'''
 match_indent = true
 
+# function Tag:load(tag_savetable)
 [[patches]]
 [patches.pattern]
 target = "tag.lua"
@@ -28,40 +22,95 @@ position = "after"
 payload = '''self.count = tag_savetable.count'''
 match_indent = true
 
+# function Tag:yep(message, _colour, func)
+# function Tag:generate_UI(_size) in tag_sprite.click
 [[patches]]
 [patches.pattern]
 target = "tag.lua"
-pattern = "self.HUD_tag.states.visible = false"
+pattern = '''
+    G.E_MANAGER:add_event(Event({
+        func = (function()
+            self.HUD_tag.states.visible = false
+            return true
+        end)
+    }))'''
 position = "at"
-payload = ''''''
+payload = '''
+-- KCR: Removed
+--[[G.E_MANAGER:add_event(Event({
+    func = (function()
+        self.HUD_tag.states.visible = false
+        return true
+    end)
+}))]]'''
 match_indent = true
 count = 2
 
+# function Tag:nope()
 [[patches]]
 [patches.pattern]
 target = "tag.lua"
-pattern = "self.HUD_tag:remove()"
-position = "after"
-payload = '''kcrGenerateTagUi()'''
+pattern = '''
+    G.E_MANAGER:add_event(Event({
+        trigger = 'after',
+        delay = 0.1,
+        func = (function()
+            self.HUD_tag.states.visible = false
+            play_sound('cancel', 1.26, 0.5)
+            return true
+        end)
+    }))
+'''
+position = "at"
+payload = '''
+-- KCR: Removed
+--[[G.E_MANAGER:add_event(Event({
+    trigger = 'after',
+    delay = 0.1,
+    func = (function()
+        self.HUD_tag.states.visible = false
+        play_sound('cancel', 1.26, 0.5)
+        return true
+    end)
+}))]]'''
 match_indent = true
 
-[[patches]]
-[patches.pattern]
-target = "tag.lua"
-pattern = "self:remove()"
-position = "after"
-payload = '''kcrGenerateTagUi()'''
-match_indent = true
-count = 1 # FIXME: Was 2; figure out why
-
+# function Tag:generate_UI(_size) in tag_sprite.click
 [[patches]]
 [patches.pattern]
 target = "tag.lua"
 pattern = "cry_too_fast_kitty = nil"
 position = "after"
-payload = '''kcrOnTagCombined(self, other_cat)'''
+payload = '''
+kcrOnTagCombined(self, other_cat)'''
 match_indent = true
 
+# function Tag:generate_UI(_size) in tag_sprite.click
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = '''local edition = G.P_CENTER_POOLS.Edition[1]
+    					local j = 1
+    					while j < other_cat.ability.level + 1 do
+    						for i = 2, #G.P_CENTER_POOLS.Edition do
+    							j = j + 1
+    							if j >= other_cat.ability.level + 1 then
+    								edition = G.P_CENTER_POOLS.Edition[i]
+    								break
+    							end
+    						end
+    					end'''
+position = "before"
+payload = '''
+if kcrDoCombine then
+	if kcrDoCombine(self, other_cat) then
+		break
+	end
+end
+'''
+match_indent = true
+
+# function add_tag(_tag)
 [[patches]]
 [patches.pattern]
 target = "functions/UI_definitions.lua"
@@ -79,6 +128,7 @@ payload = '''
 '''
 match_indent = true
 
+# function add_tag(_tag)
 [[patches]]
 [patches.pattern]
 target = "functions/UI_definitions.lua"
@@ -87,11 +137,73 @@ position = "at"
 payload = '''kcrGenerateTagUi()'''
 match_indent = true
 
-
+# function add_tag(_tag)
 [[patches]]
 [patches.pattern]
-target = "game.lua" # Tag:Yep
-pattern = '''G.FUNCS.blind_chip_UI_scale(G.hand_text_area.blind_chips)'''
-position = "before"
+target = "functions/UI_definitions.lua"
+pattern = '''local tag_sprite_ui = _tag:generate_UI()'''
+position = "at"
+payload = '''-- KCR: Removed
+-- local tag_sprite_ui = _tag:generate_UI()'''
+match_indent = true
+
+# function add_tag(_tag)
+# Because we remove _tag:generate_UI, _tag.tag_sprite is nil. Remove
+# the reference to it to prevent a game crash.
+[[patches]]
+[patches.pattern]
+target = "functions/UI_definitions.lua"
+pattern = '''
+  local _handy_tag_click_target = _tag.tag_sprite
+  local _handy_tag_click_ref = _handy_tag_click_target.click
+  _handy_tag_click_target.click = function(...)
+      if Handy.controller.process_tag_click(_tag) then return end
+      return _handy_tag_click_ref(...)
+  end'''
+position = "at"
+payload = '''
+'''
+match_indent = true
+
+# function Tag:remove()
+[[patches]]
+[patches.pattern]
+target = "tag.lua"
+pattern = '''
+    local HUD_tag_key = nil
+    for k, v in pairs(G.HUD_tags) do
+        if v == self.HUD_tag then HUD_tag_key = k end
+    end
+
+    if HUD_tag_key then 
+        if G.HUD_tags and G.HUD_tags[HUD_tag_key+1] then
+            if HUD_tag_key == 1 then
+                G.HUD_tags[HUD_tag_key+1]:set_alignment({type = 'bri',
+                offset = {x=0.7,y=0},
+                xy_bond = 'Weak',
+                major = G.ROOM_ATTACH})
+            else
+                G.HUD_tags[HUD_tag_key+1]:set_role({
+                xy_bond = 'Weak',
+                major = G.HUD_tags[HUD_tag_key-1]})
+            end
+        end
+        table.remove(G.HUD_tags, HUD_tag_key)
+    end
+
+    self.HUD_tag:remove()
+'''
+position = "at"
 payload = '''kcrGenerateTagUi()'''
-match_indent = false
+match_indent = true
+
+# function Game:start_run(args)
+# [[patches]]
+# [patches.pattern]
+# target = "game.lua" # Tag:Yep
+# pattern = '''G.FUNCS.blind_chip_UI_scale(G.hand_text_area.blind_chips)'''
+# position = "before"
+# payload = '''kcrGenerateTagUi()'''
+# match_indent = true
+
+# vim: set ts=4 sts=4 sw=4 noet:

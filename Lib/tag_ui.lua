@@ -1,7 +1,17 @@
 
-function kcrGenerateSingleTagUi(tag)
+local KCR_LEFT = 1
+local KCR_RIGHT = 2
+
+function kcrGenerateSingleTagUi(tag, do_reduce_motion)
+    local save_reduce = G.SETTINGS.reduced_motion
+    if do_reduce_motion then
+        G.SETTINGS.reduced_motion = true
+    end
     local tag_sprite_ui, tag_sprite = tag:generate_UI()
-    local right_sided = KaeCatRescue.config.anchor_right
+    if do_reduce_motion then
+        G.SETTINGS.reduced_motion = save_reduce
+    end
+    local right_sided = KaeCatRescue.config.text_anchor == KCR_RIGHT
     local x_adjust = KaeCatRescue.config.x_fine_adjust or 1.7
 
     local show_count = true
@@ -43,7 +53,13 @@ function kcrGenerateSingleTagUi(tag)
                 minw = 0.5,
                 minh = 0.4,
             },
-            nodes = right_sided and { x_node, count_node } or { count_node, x_node },
+            nodes = right_sided and {
+                x_node,
+                count_node
+            } or {
+                count_node,
+                x_node
+            },
         }
     end
 
