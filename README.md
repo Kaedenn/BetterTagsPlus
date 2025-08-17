@@ -27,3 +27,5 @@ Ability to configure the location, visibility, and behavior of the count text.
 Fixed the framerate drop after combining several hundred Cat Tags.
 
 DebugPlus integration; run `kcr help` for a list of commands.
+
+![Cat Tag Tree](assets/level_17_cat_tree.png)
