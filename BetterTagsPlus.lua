@@ -1,10 +1,10 @@
-if not KaeCatRescue then KaeCatRescue = {} end
-local MOD_NAME = "KaeCatRescue"
+if not BetterTagsPlus then BetterTagsPlus = {} end
+local MOD_NAME = "BetterTagsPlus"
 
-KaeCatRescue.config = SMODS.current_mod.config
+BetterTagsPlus.config = SMODS.current_mod.config
 
-function kcrDebug(message)
-    if KaeCatRescue.config.debug then
+function btpDebug(message)
+    if BetterTagsPlus.config.debug then
         print(message)
     end
 end
@@ -30,7 +30,7 @@ local function getTagKey(tag)
 end
 
 --[[ This function is called by the Lovely injection to draw the tags ]]
-function kcrGenerateTagUi(do_reload, do_reduce_motion)
+function btpGenerateTagUi(do_reload, do_reduce_motion)
     if do_reload then
         load_module("Lib/tag_ui.lua")
     end
@@ -65,7 +65,7 @@ function kcrGenerateTagUi(do_reload, do_reduce_motion)
         local key = getTagKey(tag)
         if not done[key] then
             tag.count = counts[key]
-            local hud_tag, sprite_tag = kcrGenerateSingleTagUi(tag, do_reduce_motion)
+            local hud_tag, sprite_tag = btpGenerateSingleTagUi(tag, do_reduce_motion)
             G.HUD_tags[#G.HUD_tags+1] = hud_tag
             if Handy then
                 local _handy_tag_click_target = tag.tag_sprite
@@ -91,9 +91,9 @@ function kcrGenerateTagUi(do_reload, do_reduce_motion)
     end
 
     -- TODO: Figure out why this exists in BetterTags
-    KaeCatRescue.tag_count = 0
+    BetterTagsPlus.tag_count = 0
     for _, entry in pairs(done) do
-        KaeCatRescue.tag_count = KaeCatRescue.tag_count + entry.tag.count
+        BetterTagsPlus.tag_count = BetterTagsPlus.tag_count + entry.tag.count
     end
 
     return true
@@ -103,19 +103,19 @@ end
 --
 -- @return boolean true to interrupt default behavior; false to invoke it
 --]]
-function kcrDoCombine(source, target)
-    if KaeCatRescue.config.fast_combine then
-        kcrDebug("Combining tags %s and %s quickly...", source, target)
+function btpDoCombine(source, target)
+    if BetterTagsPlus.config.fast_combine then
+        btpDebug("Combining tags %s and %s quickly...", source, target)
     end
     return false
 end
 
 --[[ This function is called by the Lovely injection when combining tags ]]
-function kcrOnTagCombined(source, target)
-    if KaeCatRescue.config.autosave then
+function btpOnTagCombined(source, target)
+    if BetterTagsPlus.config.autosave then
         local tag_level = (target.ability and target.ability.level or 1) + 1
-        if tag_level >= KaeCatRescue.config.save_tag_min_level then
-            kcrDebug("Saving...")
+        if tag_level >= BetterTagsPlus.config.save_tag_min_level then
+            btpDebug("Saving...")
             save_run()
         end
     end
@@ -127,12 +127,12 @@ if success and dpAPI.isVersionCompatible(1) then
     local debugplus = dpAPI.registerID(MOD_NAME)
     local commands = {}
     table.insert(commands, {
-        name = "kcr",
-        shortDesc = "Kaedenn's Cat Rescue command",
-        desc = "List KCR commands or invoke a KCR command",
+        name = "btp",
+        shortDesc = "Better Tags Plus command",
+        desc = "List BTP commands or invoke a BTP command",
         exec = function(args, rawArgs, dp)
             local cmdlib = load_module("commands.lua")
-            local kcr_commands = cmdlib.KCRCommands
+            local btp_commands = cmdlib.BTPCommands
             if #args == 0 or args[1] == "help" then
                 local lines = {("Commands added by %s:"):format(MOD_NAME)}
                 if args[1] == "help" then
@@ -142,16 +142,16 @@ if success and dpAPI.isVersionCompatible(1) then
                             command.desc or command.shortDesc))
                     end
                 end
-                for _, command in ipairs(kcr_commands) do
+                for _, command in ipairs(btp_commands) do
                     table.insert(lines, ("%s: %s"):format(
-                        "kcr " .. command.name,
+                        "btp " .. command.name,
                         args[1] == "help" and command.desc or command.shortDesc))
                 end
-                table.insert(lines, "kcr help: List KCR commands")
+                table.insert(lines, "btp help: List BTP commands")
                 return table.concat(lines, "\n")
             end
 
-            for _, command in ipairs(kcr_commands) do
+            for _, command in ipairs(btp_commands) do
                 if command.name == args[1] then
                     return command.exec(args, rawArgs, dp)
                 end

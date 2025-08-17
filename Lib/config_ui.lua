@@ -1,5 +1,5 @@
 --[[
--- This file builds the configuration menu for KaeCatRescue.
+-- This file builds the configuration menu for BetterTagsPlus.
 --
 -- This exists to allow for iterative development without needing to restart
 -- Balatro.
@@ -25,23 +25,23 @@ local function is_option_cycle(conf)
 end
 
 -- Generic function called whenever any configuration toggle is changed
-local function on_kcr_config_updated(conf)
+local function on_btp_config_updated(conf)
     if type(conf) ~= "table" then
-        kcrDebug(("on_kcr_config_updated called with non-table value %s"):format(conf))
+        btpDebug(("on_btp_config_updated called with non-table value %s"):format(conf))
     elseif is_slider(conf) then
-        on_kcr_slider_updated(conf)
+        on_btp_slider_updated(conf)
     elseif is_option_cycle(conf) then
-        on_kcr_cycle_updated(conf)
+        on_btp_cycle_updated(conf)
     end
 
     if G.STAGE == G.STAGES.RUN then
-        kcrGenerateTagUi(false, true)
+        btpGenerateTagUi(false, true)
     end
 end
 
 -- Function called when a slider is updated
-local function on_kcr_slider_updated(conf)
-    kcrDebug(conf)
+local function on_btp_slider_updated(conf)
+    btpDebug(conf)
     local prior_key = conf.ref_value .. "_prior"
     local prior_value = conf.ref_table[prior_key]
     local curr_value = conf.ref_table[conf.ref_value]
@@ -51,18 +51,18 @@ local function on_kcr_slider_updated(conf)
     if prior_value ~= curr_value then
         conf.ref_table[prior_key] = curr_value
         if G.STAGE == G.STAGES.RUN then
-            kcrGenerateTagUi(false, true)
+            btpGenerateTagUi(false, true)
         end
     end
 end
 
 -- Function called when an option cycle is updated
-local function on_kcr_cycle_updated(conf)
-    kcrDebug(conf)
+local function on_btp_cycle_updated(conf)
+    btpDebug(conf)
     local from_value = conf.from_key
     local to_value = conf.to_key
     local curr_value = conf.cycle_config.ref_table[conf.cycle_config.ref_value]
-    kcrDebug(("%s: value %s is %s -> %s"):format(
+    btpDebug(("%s: value %s is %s -> %s"):format(
         conf.cycle_config.ref_value,
         from_value,
         to_value,
@@ -71,13 +71,13 @@ local function on_kcr_cycle_updated(conf)
         conf.cycle_config.ref_table[conf.cycle_config.ref_value] = to_value
     end
     if G.STAGE == G.STAGES.RUN then
-        kcrGenerateTagUi(false, true)
+        btpGenerateTagUi(false, true)
     end
 end
 
-G.FUNCS.kcr_on_config_updated = on_kcr_config_updated
-G.FUNCS.kcr_on_slider_updated = on_kcr_slider_updated
-G.FUNCS.kcr_on_cycle_updated = on_kcr_cycle_updated
+G.FUNCS.btp_on_config_updated = on_btp_config_updated
+G.FUNCS.btp_on_slider_updated = on_btp_slider_updated
+G.FUNCS.btp_on_cycle_updated = on_btp_cycle_updated
 
 --[[ Build a proper callback function for config types needing one.
 --
@@ -85,11 +85,11 @@ G.FUNCS.kcr_on_cycle_updated = on_kcr_cycle_updated
 -- @param func function(table) Function to call
 -- @return function
 --]]
-local function kcr_build_callback(ref_value, func)
+local function btp_build_callback(ref_value, func)
     return function(new_value)
         return func({
             ref_value = ref_value,
-            ref_table = KaeCatRescue.config,
+            ref_table = BetterTagsPlus.config,
             new_value = new_value,
         })
     end
@@ -121,16 +121,16 @@ return function()
             }, nodes = {
                 create_slider{
                     label = "Location Adjustment",
-                    id = "kcr_x_adjust",
+                    id = "btp_x_adjust",
                     colour = G.C.RED,
-                    ref_table = KaeCatRescue.config,
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "x_fine_adjust",
                     label_scale = 0.5,
                     w = 2,
                     min = 0,
                     max = 3,
                     decimal_places = 1,
-                    callback = "kcr_on_slider_updated",
+                    callback = "btp_on_slider_updated",
                 },
                 {n = G.UIT.R, config = {
                     align = "tm",
@@ -168,31 +168,31 @@ return function()
                     scale = 0.8,
                     w = 4,
                     options = { "Left", "Right" },
-                    current_option = KaeCatRescue.config.text_anchor or 2,
-                    ref_table = KaeCatRescue.config,
+                    current_option = BetterTagsPlus.config.text_anchor or 2,
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "text_anchor",
-                    opt_callback = "kcr_on_cycle_updated",
+                    opt_callback = "btp_on_cycle_updated",
                 },
                 create_toggle{
                     label = "Hide 'x1' Text",
-                    id = "kcr_hide_x1",
+                    id = "btp_hide_x1",
                     info = {
                         "Hide 'x1' text when there's",
                         "just one tag of that level"
                     },
-                    ref_table = KaeCatRescue.config,
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "hide_x1",
                     active_colour = G.C.RED,
-                    callback = kcr_build_callback("hide_x1", on_kcr_config_updated),
+                    callback = btp_build_callback("hide_x1", on_btp_config_updated),
                 },
                 create_toggle{
                     label = "Hide All Text",
-                    id = "kcr_hide_text",
+                    id = "btp_hide_text",
                     info = {"Hide all text (overrides above)"},
-                    ref_table = KaeCatRescue.config,
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "hide_text",
                     active_colour = G.C.RED,
-                    callback = kcr_build_callback("hide_text", on_kcr_config_updated),
+                    callback = btp_build_callback("hide_text", on_btp_config_updated),
                 },
             }},
         }},
@@ -213,24 +213,24 @@ return function()
             }, nodes = {
                 create_toggle{
                     label = "Save on Combining",
-                    id = "kcr_autosave",
-                    ref_table = KaeCatRescue.config,
+                    id = "btp_autosave",
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "autosave",
                     active_colour = G.C.RED,
-                    callback = kcr_build_callback("autosave", on_kcr_config_updated),
+                    callback = btp_build_callback("autosave", on_btp_config_updated),
                 },
                 create_slider{
                     label = "Save on Tag Level",
-                    id = "kcr_save_tag_min_level",
+                    id = "btp_save_tag_min_level",
                     colour = G.C.RED,
-                    ref_table = KaeCatRescue.config,
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "save_tag_min_level",
                     label_scale = 0.5,
                     w = 2,
                     min = 1,
                     max = 15,
                     decimal_places = 0,
-                    callback = "kcr_on_slider_updated",
+                    callback = "btp_on_slider_updated",
                 },
                 {n = G.UIT.R, config = {
                     align = "tm",
@@ -255,14 +255,14 @@ return function()
             }, nodes = {
                 create_toggle{
                     label = "Enable Debugging",
-                    id = "kcr_debug",
-                    ref_table = KaeCatRescue.config,
+                    id = "btp_debug",
+                    ref_table = BetterTagsPlus.config,
                     ref_value = "debug",
                     active_colour = G.C.RED,
-                    callback = kcr_build_callback("debug", on_kcr_config_updated),
+                    callback = btp_build_callback("debug", on_btp_config_updated),
                 },
             }},
-            {n = G.UIT.R, config = {
+            --[[{n = G.UIT.R, config = {
                 align = "tm",
                 padding = 0.1,
                 r = 0.1,
@@ -297,27 +297,27 @@ return function()
                 }, nodes = {
                     create_toggle{
                         label = "Quick Combination",
-                        id = "kcr_fast_combine",
+                        id = "btp_fast_combine",
                         info = {"Make combining Cat Tags faster"},
-                        ref_table = KaeCatRescue.config,
+                        ref_table = BetterTagsPlus.config,
                         ref_value = "fast_combine",
                         active_colour = G.C.RED,
-                        callback = kcr_build_callback("fast_combine", on_kcr_config_updated),
+                        callback = btp_build_callback("fast_combine", on_btp_config_updated),
                     },
                     create_toggle{
                         label = "Auto-Combine",
-                        id = "kcr_auto_combine",
+                        id = "btp_auto_combine",
                         info = {
                             "Automatically combine Cat Tags",
                             "(Back-up your save before using!)"
                         },
-                        ref_table = KaeCatRescue.config,
+                        ref_table = BetterTagsPlus.config,
                         ref_value = "auto_combine",
                         active_colour = G.C.RED,
-                        callback = kcr_build_callback("auto_combine", on_kcr_config_updated),
+                        callback = btp_build_callback("auto_combine", on_btp_config_updated),
                     },
                 }},
-            }},
+            }},]]
         }},
     }}
 end

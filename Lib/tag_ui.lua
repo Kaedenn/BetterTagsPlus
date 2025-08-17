@@ -1,8 +1,8 @@
 
-local KCR_LEFT = 1
-local KCR_RIGHT = 2
+local BTP_LEFT = 1
+local BTP_RIGHT = 2
 
-function kcrGenerateSingleTagUi(tag, do_reduce_motion)
+function btpGenerateSingleTagUi(tag, do_reduce_motion)
     local save_reduce = G.SETTINGS.reduced_motion
     if do_reduce_motion then
         G.SETTINGS.reduced_motion = true
@@ -11,13 +11,13 @@ function kcrGenerateSingleTagUi(tag, do_reduce_motion)
     if do_reduce_motion then
         G.SETTINGS.reduced_motion = save_reduce
     end
-    local right_sided = KaeCatRescue.config.text_anchor == KCR_RIGHT
-    local x_adjust = KaeCatRescue.config.x_fine_adjust or 1.7
+    local right_sided = BetterTagsPlus.config.text_anchor == BTP_RIGHT
+    local x_adjust = BetterTagsPlus.config.x_fine_adjust or 1.7
 
     local show_count = true
-    if KaeCatRescue.config.hide_text then
+    if BetterTagsPlus.config.hide_text then
         show_count = false
-    elseif KaeCatRescue.config.hide_x1 and tag.count == 1 then
+    elseif BetterTagsPlus.config.hide_x1 and tag.count == 1 then
         show_count = false
     end
 

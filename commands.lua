@@ -9,7 +9,7 @@ local commands = {
         shortDesc = "Redraw",
         desc = "Redraw the tags",
         exec = function(args, rawArgs, dp)
-            kcrGenerateTagUi(true)
+            btpGenerateTagUi(true)
         end,
     },
     {
@@ -17,7 +17,7 @@ local commands = {
         shortDesc = "Count cat tags",
         desc = "This command counts the current number of cat tags",
         exec = function(args, rawArgs, dp)
-            local tally = assert(SMODS.load_file("Lib/cat_tally.lua", "KaeCatRescue"))()
+            local tally = assert(SMODS.load_file("Lib/cat_tally.lua", "BetterTagsPlus"))()
             local lines = {}
             for level, count in pairs(tally.tally_cat_tags()) do
                 local name = ("Level %s"):format(level)
@@ -32,12 +32,12 @@ local commands = {
         shortDesc = "Count collected cat tags",
         desc = "This command counts the cat tags you'd have after combining",
         exec = function(args, rawArgs, dp)
-            local tally = assert(SMODS.load_file("Lib/cat_tally.lua", "KaeCatRescue"))()
+            local tally = assert(SMODS.load_file("Lib/cat_tally.lua", "BetterTagsPlus"))()
             return tally.collect_cat_tags{asstr=true}
         end,
     },
 }
 
 return {
-    KCRCommands = commands
+    BTPCommands = commands
 }
