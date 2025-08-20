@@ -86,9 +86,53 @@ function collect_cat_tags(args)
     return result
 end
 
+--[[ Determine what's required to obtain the given Cat Tags
+--
+-- Display what's needed to obtain one Level 15 Cat Tag:
+-- print(measure_progress_to({target={[15]=1}}))
+--
+-- Display what's needed to go from one Level 14 to one Level 15 Cat Tag:
+-- print(measure_progress_to({tally={[14]=1}, target={[15]=1})
+--
+-- @param args {target: table, tally: table? asstr: boolean?}
+-- @returns string if asstr=true
+-- @returns pair num_tags: number, num_clicks: number otherwise
+--]]
+function measure_progress_to(args)
+    if not args then error("missing args object") end
+    local target = args.target or error("missing required kwarg target")
+    local tally = args.tally or tally_cat_tags()
+
+    local num_tags_curr = expand_tag_count(tally)
+    local num_tags_target = expand_tag_count(target)
+    if args.asstr then
+        local need = num_tags_target - num_tags_curr
+        if need < 0 then
+            return ("You have %d more tags than you need"):format(-need)
+        end
+        return ("You need %d more tags"):format(need)
+    end
+    return num_tags_target - num_tags_curr, 0
+end
+
+--[[ Determine how many Cat Tags went into making the given tally
+--
+-- @param tally {[level] = count}
+-- @return number
+--]]
+function expand_tag_count(tally)
+    local total = 0
+    for level, count in pairs(tally) do
+        total = total + count * math.pow(2, level - 1)
+    end
+    return total
+end
+
 return {
     tally_cat_tags = tally_cat_tags,
     collect_cat_tags = collect_cat_tags,
+    measure_progress_to = measure_progress_to,
+    expand_tag_count = expand_tag_count,
 }
 
 -- vim: set ts=4 sts=4 sw=4:

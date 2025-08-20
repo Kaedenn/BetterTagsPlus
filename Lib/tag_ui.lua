@@ -11,6 +11,7 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
     if do_reduce_motion then
         G.SETTINGS.reduced_motion = save_reduce
     end
+
     local right_sided = BetterTagsPlus.config.text_anchor == BTP_RIGHT
     local x_adjust = BetterTagsPlus.config.x_fine_adjust or 1.7
 
@@ -28,7 +29,7 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
             n = G.UIT.T,
             config = {
                 text = 'x',
-                scale = 0.4,
+                scale = tag.count >= 1000 and 0.3 or 0.4,
                 colour = G.C.MULT
             }
         }
@@ -38,7 +39,7 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
             config = {
                 ref_table = tag,
                 ref_value = "count",
-                scale = 0.4,
+                scale = tag.count >= 1000 and 0.3 or 0.4,
                 colour = G.C.UI.TEXT_LIGHT
             }
         }
