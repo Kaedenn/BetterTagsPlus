@@ -262,7 +262,7 @@ return function()
                     callback = btp_build_callback("debug", on_btp_config_updated),
                 },
             }},
-            --[[{n = G.UIT.R, config = {
+            {n = G.UIT.R, config = {
                 align = "tm",
                 padding = 0.1,
                 r = 0.1,
@@ -317,7 +317,7 @@ return function()
                         callback = btp_build_callback("auto_combine", on_btp_config_updated),
                     },
                 }},
-            }},]]
+            }},
         }},
     }}
 end
