@@ -14,6 +14,7 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
 
     local right_sided = BetterTagsPlus.config.text_anchor == BTP_RIGHT
     local x_adjust = BetterTagsPlus.config.x_fine_adjust or 1.7
+    if not right_sided then x_adjust = x_adjust - 0.3 end -- Display isn't symmetric
 
     local show_count = true
     if BetterTagsPlus.config.hide_text then
@@ -25,11 +26,17 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
     local tag_count_node = nil
 
     if show_count then
+        local scale = 0.4
+        if tag.count >= 1000 then
+            scale = 0.3
+        elseif tag.count >= 100 then
+            scale = 0.35
+        end
         local x_node = {
             n = G.UIT.T,
             config = {
                 text = 'x',
-                scale = tag.count >= 1000 and 0.3 or 0.4,
+                scale = scale,
                 colour = G.C.MULT
             }
         }
@@ -39,27 +46,37 @@ function btpGenerateSingleTagUi(tag, do_reduce_motion)
             config = {
                 ref_table = tag,
                 ref_value = "count",
-                scale = tag.count >= 1000 and 0.3 or 0.4,
+                scale = scale,
                 colour = G.C.UI.TEXT_LIGHT
             }
         }
 
+        local text_nodes = {count_node, x_node}
+        if right_sided then
+            text_nodes = {x_node, count_node}
+        end
+
         tag_count_node = {
             n = G.UIT.C,
             config = {
-                align = "cl",
-                colour = G.C.BLACK,
-                padding = 0.05,
-                r = 0.08,
-                minw = 0.5,
-                minh = 0.4,
+                align = "cm",
+                colour = G.C.CLEAR,
+                padding = 0.0,
+                r = 0.0,
             },
-            nodes = right_sided and {
-                x_node,
-                count_node
-            } or {
-                count_node,
-                x_node
+            nodes = {
+                {
+                    n = G.UIT.C,
+                    config = {
+                        align = "cm",
+                        colour = G.C.BLACK,
+                        padding = 0.02,
+                        r = 0.08,
+                        minw = 0.75,
+                        minh = 0.6,
+                    },
+                    nodes = text_nodes
+                }
             },
         }
     end

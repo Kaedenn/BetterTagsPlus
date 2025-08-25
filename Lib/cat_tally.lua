@@ -16,7 +16,22 @@ function tally_cat_tags()
     return ability_levels
 end
 
---[[ Determine what the combined cat tags would look like.
+--[[ Determine the number of double/triple/etc tags
+--
+-- @return table{[mult] = count}
+--]]
+function tally_tuple_tags()
+    local counts = {}
+    for i = 1, #G.GAME.tags do
+        local tag = G.GAME.tags[i]
+        if tag.config.type == "tag_add" then
+            counts[tag.config.num] = (counts[tag.config.num] or 0) + 1
+        end
+    end
+    return counts
+end
+
+--[[ Determine what the combined cat tags would look like
 --
 -- Condense current tags:
 -- print(collect_cat_tags({asstr=true}))
@@ -105,14 +120,33 @@ function measure_progress_to(args)
 
     local num_tags_curr = expand_tag_count(tally)
     local num_tags_target = expand_tag_count(target)
-    if args.asstr then
-        local need = num_tags_target - num_tags_curr
-        if need < 0 then
-            return ("You have %d more tags than you need"):format(-need)
-        end
-        return ("You need %d more tags"):format(need)
+    if not args.asstr then
+        return num_tags_target - num_tags_curr, 0
     end
-    return num_tags_target - num_tags_curr, 0
+
+    local need = num_tags_target - num_tags_curr
+    if need < 0 then
+        return ("You have %d more tags than you need"):format(-need)
+    end
+    local lines = {
+        ("You need %d more tags"):format(need)
+    }
+    local tuple_tally = tally_tuple_tags()
+    local pending = 0
+    for mult, count in pairs(tuple_tally) do
+        pending = pending + mult * count
+    end
+    local num_q_left = math.floor(need / 4)
+    local num_t_left = need - (num_q_left * 4)
+    if pending > 0 then
+        local num_left = need - pending - 1
+        num_q_left = math.floor(num_left / 4)
+        num_t_left = num_left - (num_q_left * 4)
+        table.insert(lines, ("You have %d tags pending"):format(pending))
+        table.insert(lines, ("This leaves %d tags left"):format(need - pending - 1))
+    end
+    table.insert(lines, ("(attainable via %d * 4 + %d)"):format(num_q_left, num_t_left))
+    return table.concat(lines, "\n")
 end
 
 --[[ Determine how many Cat Tags went into making the given tally
@@ -130,6 +164,7 @@ end
 
 return {
     tally_cat_tags = tally_cat_tags,
+    tally_tuple_tags = tally_tuple_tags,
     collect_cat_tags = collect_cat_tags,
     measure_progress_to = measure_progress_to,
     expand_tag_count = expand_tag_count,

@@ -3,17 +3,12 @@ local MOD_NAME = "BetterTagsPlus"
 
 BetterTagsPlus.config = SMODS.current_mod.config
 
-function btpDebug(message)
-    if BetterTagsPlus.config.debug then
-        print(message)
-    end
-end
-
 local function load_module(path)
     return assert(SMODS.load_file(path, MOD_NAME))()
 end
 
 load_module("Lib/tag_ui.lua")
+load_module("Lib/utility.lua")
 
 --[[ Called to draw the mod's config box ]]
 SMODS.current_mod.config_tab = function()
@@ -33,10 +28,10 @@ end
 local function getTagEdition(ability_level)
     local edition = G.P_CENTER_POOLS.Edition[1]
     local j = 1
-    while j < ability_level + 1 do
+    while j < ability_level do
         for i = 2, #G.P_CENTER_POOLS.Edition do
             j = j + 1
-            if j >= ability_level + 1 then
+            if j >= ability_level then
                 edition = G.P_CENTER_POOLS.Edition[i]
                 break
             end
@@ -78,8 +73,12 @@ function btpGenerateTagUi(do_reload, do_reduce_motion)
     end
 
     local counts = {}
+    local num_unique = 0
     for _, tag in pairs(G.GAME.tags) do
         local key = getTagKey(tag)
+        if not counts[key] then
+            num_unique = num_unique + 1
+        end
         counts[key] = (counts[key] or 0) + 1
     end
 
@@ -103,6 +102,9 @@ function btpGenerateTagUi(do_reload, do_reduce_motion)
         if not done[key] then
             tag.count = counts[key]
             local hud_tag, sprite_tag = btpGenerateSingleTagUi(tag, do_reduce_motion)
+            if num_unique > 13 then
+                hud_tag.config.offset.y = 0.9 - 0.9 * 13 / num_unique
+            end
             G.HUD_tags[#G.HUD_tags+1] = hud_tag
             if Handy then
                 local _handy_tag_click_target = tag.tag_sprite
@@ -161,7 +163,7 @@ function btpDoCombine(self_cat, other_cat)
         end
     end
 
-    btpGenerateTagUi(false, true)
+    --btpGenerateTagUi(false, true)
 
     return true
 end
