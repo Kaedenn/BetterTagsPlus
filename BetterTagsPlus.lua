@@ -106,7 +106,10 @@ function btpGenerateTagUi(do_reload, do_reduce_motion)
                 hud_tag.config.offset.y = 0.9 - 0.9 * 13 / num_unique
             end
             G.HUD_tags[#G.HUD_tags+1] = hud_tag
-            if Handy then
+            if not tag.tag_sprite then
+                tag.tag_sprite = sprite_tag
+            end
+            if Handy and tag.tag_sprite then
                 local _handy_tag_click_target = tag.tag_sprite
                 local _handy_tag_click_ref = _handy_tag_click_target.click
                 _handy_tag_click_target.click = function(...)
